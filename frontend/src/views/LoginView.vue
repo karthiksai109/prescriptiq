@@ -39,7 +39,7 @@
           
           <div v-if="error" class="error-message">{{ error }}</div>
           
-          <form @submit.prevent="handleLogin">
+          <form aria-label="Login form" @submit.prevent="handleLogin">
             <div class="form-group">
               <label class="label">Email Address</label>
               <input v-model="email" type="email" class="input-field" placeholder="sarah@prescriptiq.com" required />

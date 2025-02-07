@@ -9,7 +9,7 @@
     </div>
 
     <div class="card" style="margin-bottom: 20px;">
-      <input v-model="searchTerm" type="text" class="input-field" placeholder="Search patients by name or email..." style="max-width: 400px;" />
+      <input v-model="searchTerm" type="text" class="input-field" placeholder="Search by name or email by name or email..." style="max-width: 400px;" />
     </div>
 
     <div v-if="loading" class="loading-state">Loading patients...</div>

@@ -18,7 +18,8 @@ export async function authMiddleware({ req }: ExpressContextFunctionArgument): P
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'fallback-secret') as { id: number };
     const provider = await Provider.findByPk(decoded.id);
     return { provider, token };
-  } catch {
+  } catch (error) {
+    console.error('JWT verification failed:', (error as Error).message);
     return { provider: null, token: null };
   }
 }

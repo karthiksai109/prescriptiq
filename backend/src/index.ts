@@ -49,6 +49,7 @@ async function startServer() {
     ║      PrescriptiQ GraphQL API Server           ║
     ║      http://localhost:${PORT}/graphql              ║
     ╚═══════════════════════════════════════════════╝
+    Started at: ${new Date().toISOString()}
     `);
   });
 }

@@ -40,7 +40,7 @@ async function startServer() {
 
   // Health check endpoint
   app.get('/health', (_req, res) => {
-    res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+    res.json({ status: 'healthy', environment: process.env.NODE_ENV || 'development', timestamp: new Date().toISOString() });
   });
 
   app.listen(PORT, () => {

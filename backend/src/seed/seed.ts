@@ -4,7 +4,8 @@ dotenv.config();
 import { sequelize, Provider, Patient, Medication, Prescription, HealthMetric, Interaction } from '../models';
 import bcrypt from 'bcryptjs';
 
-async function seed() {
+async function seed(): Promise<void> {
+  const startTime = Date.now();
   console.log('Seeding database...');
 
   await sequelize.sync({ force: true });

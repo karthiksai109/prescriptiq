@@ -39,6 +39,10 @@ export class Patient extends Model<PatientAttributes, PatientCreationAttributes>
   public readonly updatedAt!: Date;
 
   // Computed BMI
+  get full_name(): string {
+    return `${this.first_name} ${this.last_name}`;
+  }
+
   get bmi(): number {
     const heightM = this.height_cm / 100;
     return parseFloat((this.weight_kg / (heightM * heightM)).toFixed(1));

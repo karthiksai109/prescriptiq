@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard">
     <div class="page-header">
-      <h1 class="page-title">Dashboard</h1>
+      <h1 class="page-title" title="Provider Dashboard Overview">Dashboard</h1>
       <p class="page-subtitle">Overview of your practice and patient outcomes</p>
     </div>
 

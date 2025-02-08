@@ -71,10 +71,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
+const route = useRoute();
 const sidebarOpen = ref(true);
 
 const isAuthenticated = computed(() => !!localStorage.getItem('prescriptiq_token'));

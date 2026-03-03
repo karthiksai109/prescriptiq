@@ -34,30 +34,86 @@
       </div>
       <div class="login-right">
         <div class="login-form-container">
-          <h2>Welcome Back</h2>
-          <p class="login-subtitle">Sign in to your provider account</p>
-          
-          <div v-if="error" class="error-message">{{ error }}</div>
-          
-          <form aria-label="Login form" @submit.prevent="handleLogin">
-            <div class="form-group">
-              <label class="label">Email Address</label>
-              <input v-model="email" type="email" class="input-field" placeholder="sarah@prescriptiq.com" required />
-            </div>
-            <div class="form-group">
-              <label class="label">Password</label>
-              <input v-model="password" type="password" class="input-field" placeholder="Enter your password" required />
-            </div>
-            <button type="submit" class="btn btn-primary login-btn" :disabled="loading">
-              {{ loading ? 'Signing in...' : 'Sign In' }}
-            </button>
-          </form>
+          <!-- LOGIN MODE -->
+          <template v-if="!isRegisterMode">
+            <h2>Welcome Back</h2>
+            <p class="login-subtitle">Sign in to your provider account</p>
+            
+            <div v-if="error" class="error-message">{{ error }}</div>
+            <div v-if="successMsg" class="success-message">{{ successMsg }}</div>
+            
+            <form aria-label="Login form" @submit.prevent="handleLogin">
+              <div class="form-group">
+                <label class="label">Email Address</label>
+                <input v-model="email" type="email" class="input-field" placeholder="sarah@prescriptiq.com" required />
+              </div>
+              <div class="form-group">
+                <label class="label">Password</label>
+                <input v-model="password" type="password" class="input-field" placeholder="Enter your password" required />
+              </div>
+              <button type="submit" class="btn btn-primary login-btn" :disabled="loading">
+                {{ loading ? 'Signing in...' : 'Sign In' }}
+              </button>
+            </form>
 
-          <div class="demo-credentials">
-            <p class="demo-title">Demo Credentials</p>
-            <p class="demo-info">Email: <strong>sarah@prescriptiq.com</strong></p>
-            <p class="demo-info">Password: <strong>demo123</strong></p>
-          </div>
+            <p class="toggle-text">
+              Don't have an account? <a href="#" @click.prevent="switchToRegister">Create one</a>
+            </p>
+
+            <div class="demo-credentials">
+              <p class="demo-title">Demo Credentials</p>
+              <p class="demo-info">Email: <strong>sarah@prescriptiq.com</strong></p>
+              <p class="demo-info">Password: <strong>demo123</strong></p>
+            </div>
+          </template>
+
+          <!-- REGISTER MODE -->
+          <template v-else>
+            <h2>Create Account</h2>
+            <p class="login-subtitle">Register as a new provider</p>
+            
+            <div v-if="error" class="error-message">{{ error }}</div>
+            
+            <form aria-label="Register form" @submit.prevent="handleRegister">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="label">First Name</label>
+                  <input v-model="regFirstName" type="text" class="input-field" placeholder="John" required />
+                </div>
+                <div class="form-group">
+                  <label class="label">Last Name</label>
+                  <input v-model="regLastName" type="text" class="input-field" placeholder="Smith" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="label">Email Address</label>
+                <input v-model="regEmail" type="email" class="input-field" placeholder="john@example.com" required />
+              </div>
+              <div class="form-group">
+                <label class="label">Specialty</label>
+                <input v-model="regSpecialty" type="text" class="input-field" placeholder="e.g. Internal Medicine" required />
+              </div>
+              <div class="form-group">
+                <label class="label">License Number</label>
+                <input v-model="regLicense" type="text" class="input-field" placeholder="e.g. MD-12345" required />
+              </div>
+              <div class="form-group">
+                <label class="label">Password</label>
+                <input v-model="regPassword" type="password" class="input-field" placeholder="Min 6 characters" required minlength="6" />
+              </div>
+              <div class="form-group">
+                <label class="label">Confirm Password</label>
+                <input v-model="regConfirmPassword" type="password" class="input-field" placeholder="Re-enter password" required />
+              </div>
+              <button type="submit" class="btn btn-primary login-btn" :disabled="loading">
+                {{ loading ? 'Creating Account...' : 'Create Account' }}
+              </button>
+            </form>
+
+            <p class="toggle-text">
+              Already have an account? <a href="#" @click.prevent="switchToLogin">Sign in</a>
+            </p>
+          </template>
         </div>
       </div>
     </div>
@@ -68,19 +124,47 @@
 import { ref } from 'vue';
 import { useMutation } from '@vue/apollo-composable';
 import { useRouter } from 'vue-router';
-import { LOGIN_MUTATION } from '../graphql/queries';
+import { LOGIN_MUTATION, REGISTER_MUTATION } from '../graphql/queries';
 
 const router = useRouter();
+
+// Shared state
+const error = ref('');
+const successMsg = ref('');
+const loading = ref(false);
+const isRegisterMode = ref(false);
+
+// Login fields
 const email = ref('sarah@prescriptiq.com');
 const password = ref('demo123');
-const error = ref('');
-const loading = ref(false);
+
+// Register fields
+const regFirstName = ref('');
+const regLastName = ref('');
+const regEmail = ref('');
+const regSpecialty = ref('');
+const regLicense = ref('');
+const regPassword = ref('');
+const regConfirmPassword = ref('');
 
 const { mutate: loginMutation } = useMutation(LOGIN_MUTATION);
+const { mutate: registerMutation } = useMutation(REGISTER_MUTATION);
+
+function switchToRegister() {
+  isRegisterMode.value = true;
+  error.value = '';
+  successMsg.value = '';
+}
+
+function switchToLogin() {
+  isRegisterMode.value = false;
+  error.value = '';
+}
 
 async function handleLogin() {
   loading.value = true;
   error.value = '';
+  successMsg.value = '';
   try {
     const result = await loginMutation({ input: { email: email.value, password: password.value } });
     if (result?.data?.login) {
@@ -91,6 +175,42 @@ async function handleLogin() {
     }
   } catch (err: any) {
     error.value = err.message || 'Login failed. Please check your credentials.';
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function handleRegister() {
+  error.value = '';
+  if (regPassword.value !== regConfirmPassword.value) {
+    error.value = 'Passwords do not match.';
+    return;
+  }
+  if (regPassword.value.length < 6) {
+    error.value = 'Password must be at least 6 characters.';
+    return;
+  }
+  loading.value = true;
+  try {
+    const result = await registerMutation({
+      input: {
+        first_name: regFirstName.value,
+        last_name: regLastName.value,
+        email: regEmail.value,
+        password: regPassword.value,
+        specialty: regSpecialty.value,
+        license_number: regLicense.value,
+      }
+    });
+    if (result?.data?.register) {
+      // Switch to login with success message
+      email.value = regEmail.value;
+      password.value = '';
+      isRegisterMode.value = false;
+      successMsg.value = 'Account created successfully! Please sign in.';
+    }
+  } catch (err: any) {
+    error.value = err.message || 'Registration failed. Please try again.';
   } finally {
     loading.value = false;
   }
@@ -241,8 +361,45 @@ async function handleLogin() {
   color: var(--text-primary);
 }
 
+.success-message {
+  background: rgba(11, 110, 79, 0.1);
+  color: var(--primary);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(11, 110, 79, 0.2);
+}
+
+.toggle-text {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-text a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.toggle-text a:hover {
+  text-decoration: underline;
+}
+
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
 @media (max-width: 768px) {
   .login-left { display: none; }
   .login-container { width: 100%; max-width: 440px; }
+  .form-row { flex-direction: column; gap: 0; }
 }
 </style>
